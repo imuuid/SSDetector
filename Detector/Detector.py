@@ -4,10 +4,10 @@ from os import popen, system
 from os.path import exists
 from threading import Thread
 from urllib.request import urlopen
-#
+
 system("Title = SSDetector")
 if urlopen("https://pastebin.com/raw/2MMvhPUL").read().decode("utf-8").strip() != "1.0":
-    print("Version is unable. Please check @SSDetector on telegram or discord.gg/ssdetector.")
+    print("Version is unable. Please check @SSDetector on telegram.")
     input()
     exit()
 

@@ -1,5 +1,4 @@
 
-from ntpath import join
 import checks as chs
 from threading import Thread
 from os import system

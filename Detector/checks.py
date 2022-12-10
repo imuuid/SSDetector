@@ -131,8 +131,9 @@ def SusFilesCheck():
     for line in PcaRead:
         line = line.strip()
         if isfile(line):
-            if hp.GetDigitalSignatureStatus(line) != "verified":
-                SusFiles.append(line)
+            if line.endswith(hp.getExecutableExtensions()):
+                if hp.GetDigitalSignatureStatus(line) != "verified":
+                    SusFiles.append(line)
         
     return hp.removeDuplicates(SusFiles)
 

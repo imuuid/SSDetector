@@ -23,7 +23,7 @@ def CheckHeader():
     Thread(target = chs.GenericInfos).start()
     Thread(target = chs.GenericChecks).start()
     Thread(target = pc.ProcessesChecks()).start()
-    chs.BypassMethodsCheck()
+    Thread(target = chs.BypassMethodsCheck()).start()
 
     if r == "y":
         Thread(target = chs.JournalCheck()).start()

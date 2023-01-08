@@ -3,17 +3,43 @@ from os.path import isfile, getmtime
 #import os.path
 from os import popen, listdir, system, getlogin
 import time
-import urllib.request
 from datetime import datetime
 import psutil
 import helpers as hp
 from subprocess import check_output
 from getpass import getuser
 import Journal as j
+from os.path import expandvars
+global SusFilesCheckStatus 
+from json import load
+import func as f
 
 
+def getAlts():
+    ALLAccounts = []
+    try:
+            
+            try:
+                    f = open(expandvars(R"C:\Users\$Username\Appdata\Roaming\.minecraft\launcher_accounts.json"),'r')
+                    j = load(f)
+                    f.close()
+                    accounts = [x['minecraftProfile']['name']for x in j["accounts"].values()]
+                    ALLAccounts.append(accounts)
+            except:
+                    pass
 
-
+            try:
+                    f = open(expandvars(R"C:\Users\$Username\.lunarclient\settings\game\accounts.json"),'r')
+                    j = load(f)
+                    f.close()
+                    vals = [x for x in j["accounts"].values()]
+                    for val in vals:
+                        ALLAccounts.append(val["username"])
+            except:
+                    pass
+    except:
+            pass
+    return ALLAccounts
 #generic infos check
 def GenericInfos(): 
     GenericInfosResult = ""
@@ -34,6 +60,7 @@ def GenericInfos():
     modTime = getmtime("C:/$Recycle.Bin/"+str(check_output(f'wmic useraccount where name="{getlogin()}" get sid')).split('\\r\\r\\n')[1])
     modTime = time.strftime('%d/%m/%Y %H:%M:%S', time.localtime(modTime))
     print()
+
     GenericInfosResult+="\n [+] Started / modified Times:"
     last_reboot = psutil.boot_time() # pc started time
     GenericInfosResult+="\n  PC Start time: " + datetime.fromtimestamp(last_reboot).strftime("%d/%m/%Y %H:%M:%S")
@@ -47,6 +74,11 @@ def GenericInfos():
     except:
         GenericInfosResult+="\n  Javaw not found."
     GenericInfosResult+="\n  RecycleBin Modified Time: " + modTime
+    alts = getAlts()
+    if len(alts)>0:
+        GenericInfosResult+="\n  Alts Found: " + str(alts)
+    else:
+        GenericInfosResult+="\n  No Alts Found."
     print(GenericInfosResult)    
 
 #Bypass Methods Check
@@ -58,6 +90,7 @@ def StoppedProcessesCheck():
         out = str(check_output(["sc", "query", i]))
         if "STOPPED" in out:
             StoppedProcesses.append(i)
+            f.status = "unlegit"
     return StoppedProcesses
 
 def JavaJar(): 
@@ -80,6 +113,8 @@ def JavaJar():
                     results += ","+CheatName
                 else:
                     results += CheatName
+                
+                
     return results
 
 
@@ -114,8 +149,8 @@ def recordingscan():
 
 def JnativeHookTempCheck():
     today = datetime.today().strftime('%Y-%m-%d')
-    for file in listdir(f"C:\\Users\\{getuser()}\\AppData\\Local\\Temp\\"):
-        
+    TempFolder = f"C:\\Users\\{getuser()}\\AppData\\Local\\Temp\\"
+    for file in listdir(TempFolder):
         if "jnativehook" in file.lower():
             MTimeFile = hp.modification_date_day(TempFolder+file)
             return MTimeFile==today
@@ -123,6 +158,7 @@ def JnativeHookTempCheck():
             return False
 
 def SusFilesCheck():
+    
     SusFiles = []
     Pca = open("C:\\Detector\\Processes\\PcaSvc.txt","r")
     PcaRead = Pca.readlines()
@@ -136,6 +172,7 @@ def SusFilesCheck():
                     SusFiles.append(line)
         
     return hp.removeDuplicates(SusFiles)
+
 
 
 def MovedOrRemovedFilesCheck(): # check in costruzione
@@ -162,19 +199,22 @@ def BypassMethodsCheck():
         print("[!] Stopped Processes Found!")
         for i in Stoppeds:
             print(" [-] " + i)
+        f.status = "unlegit"
     JavaJarFile = JavaJar()
     if len(JavaJarFile)!=0:
         print("[!] Java Jar Bypass Method Found!")
         print(" - " +JavaJarFile)
+        f.status = "unlegit"
         #for i in JavaJarFile:
             #print(" [-] " + i)
-    SusFiles = SusFilesCheck()
-    if len(SusFiles)!=0:
-        print("[!] Suspicious Files Check - Not Valid/Not signed Files:")
-        for i in SusFiles:
-            print(" - " + i)
-    return True
-
+    if SusFilesCheckStatus:
+        SusFiles = SusFilesCheck()
+        if len(SusFiles)!=0:
+            print("[!] Suspicious Files Check - Not Valid/Not signed Files:")
+            for i in SusFiles:
+                print(" - " + i)
+    else:
+        print("[!] SUSFilesCheck unabled due to VisualStudio2015 missing dll.")
 
 
 
@@ -190,6 +230,7 @@ def GenericChecks():
             print(" - " + i)
     if JnativeHookTempCheck():
         print("[!] JnativeHook found in temp folder. Jar Autoclicker started today.")
+        f.status = "unlegit"
 
 
 def JournalCheck():
@@ -211,5 +252,6 @@ def JournalCheck():
         File.write(res)
         print(fr"C:\Users\{getuser()}\AppData\Local\Temp\JournalCheck.txt")
     system(fr"C:\Users\{getuser()}\AppData\Local\Temp\JournalCheck.txt")
+    
             
     

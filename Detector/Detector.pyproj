@@ -24,8 +24,10 @@
     <Compile Include="CheckHeader.py" />
     <Compile Include="checks.py" />
     <Compile Include="Detector.py" />
+    <Compile Include="func.py" />
     <Compile Include="helpers.py" />
     <Compile Include="Journal.py" />
+    <Compile Include="loginSystem.py" />
     <Compile Include="ProcessesCheck.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />

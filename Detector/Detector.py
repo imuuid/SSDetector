@@ -1,21 +1,29 @@
-import checks as cks
+
 import CheckHeader as CH
 from os import popen, system
 from os.path import exists
 from threading import Thread
-from urllib.request import urlopen
+from loginSystem import Login
+
+
+
 
 system("Title = SSDetector")
-if urlopen("https://pastebin.com/raw/2MMvhPUL").read().decode("utf-8").strip() != "1.0":
-    print("Version is unable. Please check @SSDetectorTool on telegram.")
-    input()
+res = Login()
+if res == "OldVersion":
+    print("This is an Old Version.")
+    print("Check @SSDetectorTool // https://github.com/nestyk/SSDetector/\n\n")
+    input("Press a key to exit.")
     exit()
-
+if res == "HwidBlackListed":
+    print("You have been blacklisted by SSDetector.")
+    print("Regards, SSDetector Team.")
+    print("@SSDetectorTool on telegram, @SSDetectorBot to support.\n\n")
+    input("Press a key to exit.")
+    exit()
 print("loading some resources...")
-if not exists("C:\\Windows\\System32\\VCRUNTIME140D.dll"):
-    output = popen(fr'certutil -urlcache -split -f https://cdn.discordapp.com/attachments/1049264531681054730/1050507295592812684/vcruntime140d.dll C:\Windows\System32\vcruntime140d.dll')
+
 if not exists("C:\\Detector"):
-    
     system("mkdir C:\\Detector")
     system("mkdir C:\\Detector\\Processes")
 try:
@@ -26,6 +34,7 @@ except:
     print("Scan is unabled. Try to deactivate the antivirus.")
     input()
     exit()
+
 Thread(target = CH.CheckHeader).start()
 #
 

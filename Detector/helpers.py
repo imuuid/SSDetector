@@ -13,13 +13,20 @@ def getPid(name, service=False):
                     pid = process.split()[1]
                     return pid
         else:
-            pid = [p.pid for p in process_iter(attrs=['pid', 'name']) if name == p.name()][0]
-            return pid
+            try:
+                pid = [p.pid for p in process_iter(attrs=['pid', 'name']) if name == p.name()][0]
+                return pid
+            except:
+                return 0
             
 def getProcessStartTime(pid):
     process = Process(int(pid))
     process.create_time()
     return strftime("%d/%m/%Y %H:%M:%S", localtime(process.create_time()))
+
+def getJavawStartTime():
+    return getProcessStartTime(getPid("javaw.exe"))
+
 
 def modification_date_day(filename):
     t = getmtime(filename)

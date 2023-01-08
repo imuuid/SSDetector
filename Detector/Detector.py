@@ -4,10 +4,11 @@ from os import popen, system
 from os.path import exists
 from threading import Thread
 from loginSystem import Login
+from checks import getAlts
 
 
-
-
+print(getAlts())
+exit()
 system("Title = SSDetector")
 res = Login()
 if res == "OldVersion":

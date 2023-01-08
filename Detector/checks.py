@@ -13,7 +13,7 @@ from os.path import expandvars
 global SusFilesCheckStatus 
 from json import load
 import func as f
-
+import re
 
 def getAlts():
     ALLAccounts = []
@@ -27,7 +27,6 @@ def getAlts():
                     ALLAccounts.append(accounts)
             except:
                     pass
-
             try:
                     f = open(expandvars(R"C:\Users\$Username\.lunarclient\settings\game\accounts.json"),'r')
                     j = load(f)
@@ -35,6 +34,22 @@ def getAlts():
                     vals = [x for x in j["accounts"].values()]
                     for val in vals:
                         ALLAccounts.append(val["username"])
+            except:
+                    pass
+            try:
+                    with open(expandvars(R"C:\Users\$Username\AppData\Roaming\.minecraft\usercache.json"),'r') as f:
+                        AccountsList = f.read()
+                        source=AccountsList
+                        start_sep='{'
+                        end_sep='}'
+                        result=[]
+                        tmp=source.split(start_sep)
+                        for par in tmp:
+                          if end_sep in par:
+                            result.append(par.split(end_sep)[0])
+                        for i in result:
+                            newres = re.search('"name":"(.*)","uuid":"',i)
+                            ALLAccounts.append(newres.group(1))
             except:
                     pass
     except:

@@ -4,3 +4,6 @@
 Detector/__pycache__/helpers.cpython-310.pyc
 *.pyc
 *.pyc
+Detector/loginSystem.py
+Detector/func.py
+.vs/Detector/v17/.suo

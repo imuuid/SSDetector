@@ -1,7 +1,6 @@
 
 from os.path import isfile, getmtime
-#import os.path
-from os import popen, listdir, system, getlogin
+from os import listdir, system, getlogin
 import time
 from datetime import datetime
 import psutil
@@ -10,11 +9,11 @@ from subprocess import check_output
 from getpass import getuser
 import Journal as j
 from os.path import expandvars
-global SusFilesCheckStatus 
 from json import load
 import func as f
 import re
 
+global SusFilesCheckStatus
 def getAlts():
     ALLAccounts = []
     try:
@@ -54,49 +53,10 @@ def getAlts():
                     pass
     except:
             pass
-    return ALLAccounts
+    return hp.removeDuplicates(ALLAccounts)
 #generic infos check
-def GenericInfos(): 
-    GenericInfosResult = ""
-    mcprocess_info = {} #thanks to https://github.com/Jammy108/AstroSS/blob/master/Astro/astro.py
-    process = [p for p in psutil.process_iter(attrs=['pid', 'name']) if 'javaw' in p.info['name']]
-    if process:
-        process = process[0]
-        pid = process.info['pid']
-    try:    
-        process = process.cmdline()
-    except:
-       pass
-    for argument in process:
-        if "--" in argument:
-            mcprocess_info[argument.split("--")[1]] = process[process.index(argument) + 1]
 
- 
-    modTime = getmtime("C:/$Recycle.Bin/"+str(check_output(f'wmic useraccount where name="{getlogin()}" get sid')).split('\\r\\r\\n')[1])
-    modTime = time.strftime('%d/%m/%Y %H:%M:%S', time.localtime(modTime))
-    print()
 
-    GenericInfosResult+="\n [+] Started / modified Times:"
-    last_reboot = psutil.boot_time() # pc started time
-    GenericInfosResult+="\n  PC Start time: " + datetime.fromtimestamp(last_reboot).strftime("%d/%m/%Y %H:%M:%S")
-    GenericInfosResult+="\n  explorer Start Time: " + hp.getProcessStartTime(hp.getPid("explorer.exe"))
-    try:
-        GenericInfosResult+="\n  DPS Start Time: " + hp.getProcessStartTime(hp.getPid("DPS",True))
-    except:
-        GenericInfosResult+="\n  Dps not found."
-    try:
-        GenericInfosResult+="\n  Javaw Start Time: " + hp.getProcessStartTime(hp.getPid("javaw.exe"))
-    except:
-        GenericInfosResult+="\n  Javaw not found."
-    GenericInfosResult+="\n  RecycleBin Modified Time: " + modTime
-    alts = getAlts()
-    if len(alts)>0:
-        GenericInfosResult+="\n  Alts Found: " + str(alts)
-    else:
-        GenericInfosResult+="\n  No Alts Found."
-    print(GenericInfosResult)    
-
-#Bypass Methods Check
 
 def StoppedProcessesCheck():
     StoppedProcesses = []
@@ -108,29 +68,6 @@ def StoppedProcessesCheck():
             f.status = "unlegit"
     return StoppedProcesses
 
-def JavaJar(): 
-    results = ""
-    IsThereJavaString = False 
-    CheatName = ""
-    f = open("C:\\Detector\\Processes\\explorer.txt")
-    Lines = f.read().split("\n")
-    f.close()
-    for line in Lines:
-        if "-jar" in line and line.endswith(".jar"):
-            IsThereJavaString = True
-            CheatName = line.split(" ")[-1]
-    for file in listdir("C:\\Windows\\Prefetch"):
-        if "JAVA.EXE" in file:
-            if len(CheatName) == 0:
-                break
-            if hp.modification_date_day("C:\\Windows\\Prefetch\\"+file)==datetime.today().strftime('%Y-%m-%d') and IsThereJavaString:
-                if len(results)!=0:
-                    results += ","+CheatName
-                else:
-                    results += CheatName
-                
-                
-    return results
 
 
 
@@ -162,22 +99,13 @@ def recordingscan():
             pass
     return hp.removeDuplicates(results)
 
-def JnativeHookTempCheck():
-    today = datetime.today().strftime('%Y-%m-%d')
-    TempFolder = f"C:\\Users\\{getuser()}\\AppData\\Local\\Temp\\"
-    for file in listdir(TempFolder):
-        if "jnativehook" in file.lower():
-            MTimeFile = hp.modification_date_day(TempFolder+file)
-            return MTimeFile==today
-        else:
-            return False
+
 
 def SusFilesCheck():
     
     SusFiles = []
-    Pca = open("C:\\Detector\\Processes\\PcaSvc.txt","r")
-    PcaRead = Pca.readlines()
-    Pca.close()
+
+    PcaRead = hp.dump(hp.getPid("PcaSvc",True))
     
     for line in PcaRead:
         line = line.strip()
@@ -208,45 +136,77 @@ def MovedOrRemovedFilesCheck(): # check in costruzione
 
 
 def BypassMethodsCheck():
-    
+    Result = ""
     Stoppeds = StoppedProcessesCheck()
     if len(Stoppeds)!=0:
-        print("[!] Stopped Processes Found!")
+        Result += "\n[!] Stopped Processes Found!"
         for i in Stoppeds:
-            print(" [-] " + i)
+            Result += "\n [-] " + i
         f.status = "unlegit"
-    JavaJarFile = JavaJar()
-    if len(JavaJarFile)!=0:
-        print("[!] Java Jar Bypass Method Found!")
-        print(" - " +JavaJarFile)
-        f.status = "unlegit"
-        #for i in JavaJarFile:
-            #print(" [-] " + i)
+
     if SusFilesCheckStatus:
         SusFiles = SusFilesCheck()
         if len(SusFiles)!=0:
-            print("[!] Suspicious Files Check - Not Valid/Not signed Files:")
+            Result += "\n[!] Suspicious Files Check - Not Valid/Not signed Files:"
             for i in SusFiles:
-                print(" - " + i)
+                Result += "\n - " + i
     else:
-        print("[!] SUSFilesCheck unabled due to VisualStudio2015 missing dll.")
+        Result += "\n[!] SUSFilesCheck unabled due to VisualStudio2015 missing dll."
+    return Result
+
+def GenericInfos():
+    GenericInfosResult = ""
+    mcprocess_info = {}  # thanks to https://github.com/Jammy108/AstroSS/blob/master/Astro/astro.py
+    process = [p for p in psutil.process_iter(attrs=['pid', 'name']) if 'javaw' in p.info['name']]
+    if process:
+        process = process[0]
+        pid = process.info['pid']
+    try:
+        process = process.cmdline()
+    except:
+        pass
+    for argument in process:
+        if "--" in argument:
+            mcprocess_info[argument.split("--")[1]] = process[process.index(argument) + 1]
+
+    modTime = getmtime("C:/$Recycle.Bin/" +
+                       str(check_output(f'wmic useraccount where name="{getlogin()}" get sid')).split('\\r\\r\\n')[1])
+    modTime = time.strftime('%d/%m/%Y %H:%M:%S', time.localtime(modTime))
 
 
-
+    GenericInfosResult += "\n[+] Started / modified Times:"
+    last_reboot = psutil.boot_time()  # pc started time
+    GenericInfosResult += "\n  PC Start time: " + datetime.fromtimestamp(last_reboot).strftime("%d/%m/%Y %H:%M:%S")
+    GenericInfosResult += "\n  explorer Start Time: " + hp.getProcessStartTime(hp.getPid("explorer.exe"))
+    try:
+        GenericInfosResult += "\n  DPS Start Time: " + hp.getProcessStartTime(hp.getPid("DPS", True))
+    except:
+        GenericInfosResult += "\n  Dps not found."
+    try:
+        GenericInfosResult += "\n  Javaw Start Time: " + hp.getProcessStartTime(hp.getPid("javaw.exe"))
+    except:
+        GenericInfosResult += "\n  Javaw not found."
+    GenericInfosResult += "\n  RecycleBin Modified Time: " + modTime
+    alts = getAlts()
+    if len(alts) > 0:
+        GenericInfosResult += "\n  Alts Found: " + str(alts)
+    else:
+        GenericInfosResult += "\n  No Alts Found."
+    return GenericInfosResult
 
 
 def GenericChecks():
-    RecScan = recordingscan()
-    print("[+] Generic Checks:")
-    print("\n\n")
-    if len(RecScan)!=0:
-        print("[!] Recording Softwares Found!")
-        for i in RecScan:
-            print(" - " + i)
-    if JnativeHookTempCheck():
-        print("[!] JnativeHook found in temp folder. Jar Autoclicker started today.")
-        f.status = "unlegit"
+    Result = ""
 
+    RecScan = recordingscan()
+    Result += "\n[+] Generic Checks:"
+
+    if len(RecScan)!=0:
+        Result += "\n[!] Recording Softwares Found!"
+        for i in RecScan:
+            Result += "\n - " + i
+
+    return Result
 
 def JournalCheck():
     res = "Journal Check " + datetime.now().strftime("%d/%m/%Y %H:%M:%S")

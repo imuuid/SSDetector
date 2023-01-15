@@ -1,0 +1,4 @@
+
+*.pyc
+Detector/func.py
+Detector/loginSystem.py

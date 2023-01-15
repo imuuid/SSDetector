@@ -37,16 +37,18 @@ def usn_get_name_by_id(id):
     output = output.replace("Nome collegamento causale al file: \\\\?\\" ,"")
     return output
 
-def dump(pid,filepathname):
-   
-    system(f"C:\\Detector\\DetectorRes.exe -pid {pid} > {filepathname}")
+def dump(pid): #thx astross
+    cmd = f'C:/Detector/DetectorRes.exe -pid {pid} -raw'
+    strings = str(check_output(cmd)).replace("\\\\","/")
+    strings = list(set(strings.split("\\r\\n")))
+    return strings
 
 def destruct():
     system("del C:\\Detector\\DetectorRes.exe")
     system("del C:\\Detector\\DetectorSign.exe")
     #system("del C:\\Detector\\Processes\\dps.txt")
-    system("del C:\\Detector\\Processes\\explorer.txt")
-    system("del C:\\Detector\\Processes\\PcaSvc.txt")
+    #system("del C:\\Detector\\Processes\\explorer.txt")
+    #system("del C:\\Detector\\Processes\\PcaSvc.txt")
 
 def getExecutableExtensions():
     return (".exe",".com",".pif",".bat",".cmd",".run",".jar",".py")

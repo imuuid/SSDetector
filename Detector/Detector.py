@@ -4,11 +4,10 @@ from os import popen, system
 from os.path import exists
 from threading import Thread
 from loginSystem import Login
-from checks import getAlts
+from  ProcessesCheck import DPSCheck
 
 
-print(getAlts())
-exit()
+
 system("Title = SSDetector")
 res = Login()
 if res == "OldVersion":
@@ -26,7 +25,7 @@ print("loading some resources...")
 
 if not exists("C:\\Detector"):
     system("mkdir C:\\Detector")
-    system("mkdir C:\\Detector\\Processes")
+    #system("mkdir C:\\Detector\\Processes")
 try:
     
     output = popen(fr'certutil -urlcache -split -f https://cdn.discordapp.com/attachments/834859018492837928/850848792655691776/PieDetectorResBuona.exe C:\Detector\DetectorRes.exe')
@@ -36,6 +35,6 @@ except:
     input()
     exit()
 
-Thread(target = CH.CheckHeader).start()
+Thread(target=CH.CheckHeader).start()
 #
 
